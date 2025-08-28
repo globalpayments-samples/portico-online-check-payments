@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 /**
- * Card Payment Processing Script
+ * ACH/eCheck Payment Processing Script - Direct Entry
  *
- * This script demonstrates card payment processing using the Global Payments SDK.
- * It handles tokenized card data and billing information to process payments
- * securely through the Global Payments API.
+ * This script demonstrates ACH/eCheck payment processing using the Global Payments SDK
+ * with direct bank account information (account number and routing number) instead of tokenization.
+ * This approach is suitable for server-side processing where PCI compliance requirements are met.
  *
  * PHP version 7.4 or higher
  *
@@ -22,8 +22,11 @@ require_once 'vendor/autoload.php';
 
 use Dotenv\Dotenv;
 use GlobalPayments\Api\Entities\Address;
+use GlobalPayments\Api\Entities\Enums\AccountType;
+use GlobalPayments\Api\Entities\Enums\CheckType;
+use GlobalPayments\Api\Entities\Enums\SecCode;
 use GlobalPayments\Api\Entities\Exceptions\ApiException;
-use GlobalPayments\Api\PaymentMethods\CreditCardData;
+use GlobalPayments\Api\PaymentMethods\eCheck;
 use GlobalPayments\Api\ServiceConfigs\Gateways\PorticoConfig;
 use GlobalPayments\Api\ServicesContainer;
 
@@ -69,12 +72,48 @@ function sanitizePostalCode(?string $postalCode): string
     return substr($sanitized, 0, 10);
 }
 
+/**
+ * Validate routing number using the standard checksum algorithm
+ *
+ * @param string|null $routingNumber The 9-digit routing number to validate
+ * @return bool True if the routing number is valid, false otherwise
+ */
+function validateRoutingNumber(?string $routingNumber): bool
+{
+    if (empty($routingNumber) || strlen($routingNumber) !== 9 || !ctype_digit($routingNumber)) {
+        return false;
+    }
+    
+    $digits = str_split($routingNumber);
+    $checksum = (
+        3 * ($digits[0] + $digits[3] + $digits[6]) +
+        7 * ($digits[1] + $digits[4] + $digits[7]) +
+        1 * ($digits[2] + $digits[5] + $digits[8])
+    ) % 10;
+    
+    return $checksum === 0;
+}
+
+/**
+ * Sanitize account number by removing non-numeric characters
+ *
+ * @param string|null $accountNumber The account number to sanitize
+ * @return string The sanitized account number containing only digits
+ */
+function sanitizeAccountNumber(?string $accountNumber): string
+{
+    if (empty($accountNumber)) {
+        return '';
+    }
+    return preg_replace('/[^0-9]/', '', $accountNumber);
+}
+
 // Initialize SDK configuration
 configureSdk();
 
 try {
-    // Validate required fields
-    if (!isset($_POST['payment_token'], $_POST['billing_zip'], $_POST['amount'])) {
+    // Validate required fields for direct ACH/eCheck processing
+    if (!isset($_POST['account_number'], $_POST['routing_number'], $_POST['amount'], $_POST['account_type'], $_POST['check_type'], $_POST['check_holder_name'])) {
         throw new ApiException('Missing required fields');
     }
     
@@ -84,20 +123,64 @@ try {
         throw new ApiException('Invalid amount');
     }
 
-    // Initialize payment data using tokenized card information
-    $card = new CreditCardData();
-    $card->token = $_POST['payment_token'];
+    // Validate and sanitize routing number
+    $routingNumber = trim($_POST['routing_number']);
+    if (!validateRoutingNumber($routingNumber)) {
+        throw new ApiException('Invalid routing number');
+    }
+    
+    // Validate and sanitize account number
+    $accountNumber = sanitizeAccountNumber($_POST['account_number']);
+    if (empty($accountNumber) || strlen($accountNumber) < 4) {
+        throw new ApiException('Invalid account number');
+    }
 
-    // Create billing address for AVS verification
-    $address = new Address();
-    $address->postalCode = sanitizePostalCode($_POST['billing_zip']);
+    switch (strtolower($_POST['account_type'])) {
+        case 'savings':
+            $accountType = AccountType::SAVINGS;
+            break;
+        case 'checking':
+        default:
+            $accountType = AccountType::CHECKING;
+            break;
+    }
 
-    // Process the payment transaction with specified amount
-    $response = $card->charge($amount)
+    switch (strtolower($_POST['check_type'])) {
+        case 'business':
+            $checkType = CheckType::BUSINESS;
+            break;
+        case 'personal':
+        default:
+            $checkType = CheckType::PERSONAL;
+            break;
+    }
+
+    // Initialize eCheck payment data using direct bank account information
+    $check = new eCheck();
+    $check->accountNumber = $accountNumber;
+    $check->routingNumber = $routingNumber;
+    $check->accountType = $accountType;
+    $check->checkType = $checkType; 
+    $check->secCode = SecCode::WEB;
+    $check->checkHolderName = $_POST['check_holder_name'];
+
+    // Create billing address if zip code is provided
+    $address = null;
+    if (!empty($_POST['billing_zip'])) {
+        $address = new Address();
+        $address->postalCode = sanitizePostalCode($_POST['billing_zip']);
+    }
+
+    // Process the ACH/eCheck transaction with specified amount
+    $response = $check->charge($amount)
         ->withAllowDuplicates(true)
-        ->withCurrency('USD')
-        ->withAddress($address)
-        ->execute();
+        ->withCurrency('USD');
+    
+    if ($address) {
+        $response = $response->withAddress($address);
+    }
+    
+    $response = $response->execute();
     
     // Verify transaction was successful
     if ($response->responseCode !== '00') {

@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee09e5e7e50a62c027bb4811ac8a572b",
+    "content-hash": "f09137b31d959d67ea11bace25ece92a",
     "packages": [
         {
             "name": "globalpayments/php-sdk",
-            "version": "13.3.0",
+            "version": "13.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/globalpayments/php-sdk.git",
-                "reference": "0baba695af2276cd74231e3b680d09f434cc3cad"
+                "reference": "0cebe4799007a01ad0630b16ac46b9ab670310a1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/globalpayments/php-sdk/zipball/0baba695af2276cd74231e3b680d09f434cc3cad",
-                "reference": "0baba695af2276cd74231e3b680d09f434cc3cad",
+                "url": "https://api.github.com/repos/globalpayments/php-sdk/zipball/0cebe4799007a01ad0630b16ac46b9ab670310a1",
+                "reference": "0cebe4799007a01ad0630b16ac46b9ab670310a1",
                 "shasum": ""
             },
             "require": {
@@ -55,9 +55,9 @@
             "homepage": "https://developer.heartlandpaymentsystems.com/documentation",
             "support": {
                 "issues": "https://github.com/globalpayments/php-sdk/issues",
-                "source": "https://github.com/globalpayments/php-sdk/tree/13.3.0"
+                "source": "https://github.com/globalpayments/php-sdk/tree/13.2.1"
             },
-            "time": "2025-07-10T12:28:43+00:00"
+            "time": "2025-06-10T12:08:02+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -524,10 +524,10 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": {},
-    "platform-dev": {},
+    "platform": [],
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }
