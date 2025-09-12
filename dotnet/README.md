@@ -1,6 +1,6 @@
-# .NET Card Payment Example
+# .NET ACH/eCheck Payment Example
 
-This example demonstrates card payment processing using ASP.NET Core and the Global Payments SDK.
+This example demonstrates ACH/eCheck payment processing using ASP.NET Core and the Global Payments SDK with direct bank account information.
 
 ## Requirements
 
@@ -78,11 +78,16 @@ Response:
 ```
 
 ### POST /process-payment
-Processes a payment using the provided token and billing information.
+Processes an ACH/eCheck payment using direct bank account information.
 
 Request Parameters:
-- `payment_token` (string, required) - Token from client-side SDK
-- `billing_zip` (string, required) - Billing postal code
+- `account_number` (string, required) - Bank account number
+- `routing_number` (string, required) - Bank routing number (9 digits)
+- `account_type` (string, required) - Account type ("checking" or "savings")
+- `check_type` (string, required) - Check type ("personal" or "business")
+- `check_holder_name` (string, required) - Name on the account
+- `amount` (number, required) - Payment amount
+- `billing_zip` (string, optional) - Billing zip code
 
 Response (Success):
 ```json

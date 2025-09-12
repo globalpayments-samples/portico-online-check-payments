@@ -3,211 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Payments - Developer Example</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://globalpayments-samples.github.io/css/styles.css">
+    <title>ACH/eCheck Payments - Direct Entry</title>
+    <style>
+        /* Center the form horizontally and set a max width */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            font-size: 0.79em;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Form Heading */
+        h1 {
+            font-size: 2em;
+            margin-bottom: 0.2em;
+        }
+
+        h2 {
+            font-size: 1.2em;
+            margin-bottom: 1em;
+        }
+
+        /* General Form Styles */
+        form {
+            border-top: 3px solid #000000;
+            padding-top: 20px;
+        }
+
+        /* Input Fields */
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"],
+        input[type="number"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            font-size: 16px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+        }
+
+        /* Row layout for account/routing numbers */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .row .half {
+            flex: 1 1 48%;
+        }
+
+        /* Submit Button */
+        button {
+            width: 100%;
+            background-color: #0077cc;
+            color: white;
+            padding: 14px 20px;
+            margin-top: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #005fa3;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Security notice */
+        .security-notice {
+            background-color: #f0f8ff;
+            border: 1px solid #0077cc;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .security-notice strong {
+            color: #0077cc;
+        }
+
+        /* Error/Success Messages */
+        .message {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .error {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            color: #c00;
+        }
+
+        .success {
+            background-color: #efe;
+            border: 1px solid #cfc;
+            color: #060;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            .row {
+                flex-direction: column;
+            }
+            .row .half {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="gp-header">
-        <div class="gp-container">
-            <div class="gp-header-content">
-                <div class="gp-logo">
-                    <picture>
-                        <source media="(min-width: 768px)" srcset="https://globalpayments-samples.github.io/assets/img/GP_logo.svg">
-                        <img src="https://globalpayments-samples.github.io/assets/img/GP_favicon.svg" alt="Global Payments" style="height: 32px; width: auto;">
-                    </picture>
-                </div>
-                <nav class="gp-header-nav">
-                    <a href="https://developer.globalpay.com/">Documentation</a>
-                    <a href="https://developer.globalpay.com/api">API Reference</a>
-                    <a href="https://developer.globalpay.com/sdks">SDKs</a>
-                </nav>
-            </div>
+    <div class="container">
+        <h1>ACH/eCheck Payments</h1>
+        <h2>Electronic Check Payment Form - Direct Entry</h2>
+        
+        <div class="security-notice">
+            <strong>Security Notice:</strong> This form demonstrates direct bank account data entry for testing purposes. 
+            In production, always use tokenization to protect sensitive banking information.
         </div>
-    </header>
-
-    <div class="gp-container">
-        <!-- Page Title -->
-        <h1 class="gp-page-title">SDK Integration Examples</h1>
-        <p class="gp-page-subtitle">Explore comprehensive examples of Global Payments SDK implementations across different payment scenarios.</p>
-
-        <!-- Tabs -->
-        <div class="gp-tabs">
-            <div class="gp-tab-list">
-                <button class="gp-tab-button active" data-tab="payment-form">Payment Form</button>
-                <button class="gp-tab-button" data-tab="tokenization">Tokenization</button>
-                <button class="gp-tab-button" data-tab="webhooks">Webhooks</button>
-                <button class="gp-tab-button" data-tab="recurring">Recurring Payments</button>
+        
+        <div id="message-container"></div>
+        
+        <form id="payment-form" action="process-payment.php" method="POST">
+            <div>
+                <label for="amount">Amount ($):</label>
+                <input type="number" id="amount" name="amount" min="0.01" step="0.01" value="10.00" required>
             </div>
-
-            <!-- Payment Form Tab -->
-            <div class="gp-tab-content active" id="payment-form">
-                <div class="gp-card">
-                    <div class="gp-card-header">
-                        <h2 class="gp-card-title">Credit Card Payment Form</h2>
-                        <p class="gp-card-description">
-                            Secure payment processing using Global Payments tokenization with client-side form validation.
-                        </p>
-                    </div>
-                    
-                    <form id="payment-form" class="gp-form" action="/process-payment" method="POST">
-                        <div class="gp-form-group">
-                            <label for="amount" class="gp-label">Amount ($):</label>
-                            <input type="number" id="amount" name="amount" class="gp-input" min="0.01" step="0.01" value="10.00" required>
-                        </div>
-                        
-                        <div class="gp-form-group">
-                            <label for="billing_zip" class="gp-label">Billing Zip Code:</label>
-                            <input type="text" id="billing_zip" name="billing_zip" class="gp-input" placeholder="12345" required>
-                        </div>
-
-                        <div class="gp-form-group">
-                            <label class="gp-label">Credit Card Information:</label>
-                            <div id="credit-card"></div>
-                        </div>
-
-                        <button type="submit" class="gp-button gp-button-primary gp-button-full">
-                            Process Payment
-                        </button>
-                    </form>
+            
+            <div>
+                <label for="check_holder_name">Account Holder Name:</label>
+                <input type="text" id="check_holder_name" name="check_holder_name" placeholder="John Doe" required>
+            </div>
+            
+            <div class="row">
+                <div class="half">
+                    <label for="account_number">Account Number:</label>
+                    <input type="text" id="account_number" name="account_number" placeholder="1234567890" pattern="[0-9]+" maxlength="17" required>
+                </div>
+                <div class="half">
+                    <label for="routing_number">Routing Number:</label>
+                    <input type="text" id="routing_number" name="routing_number" placeholder="021000021" pattern="[0-9]{9}" maxlength="9" required>
                 </div>
             </div>
-
-            <!-- Tokenization Tab -->
-            <div class="gp-tab-content" id="tokenization">
-                <div class="gp-card">
-                    <div class="gp-card-header">
-                        <h2 class="gp-card-title">Card Tokenization</h2>
-                        <p class="gp-card-description">
-                            Securely tokenize payment methods for future use without storing sensitive card data.
-                        </p>
-                    </div>
-                    
-                    <div class="gp-alert gp-alert-info">
-                        <strong>Info:</strong> Tokens can be stored securely and used for future transactions without handling raw card data.
-                    </div>
-
-                    <form id="tokenization-form" class="gp-form">
-                        <div class="gp-form-group">
-                            <label class="gp-label">Card Information for Tokenization:</label>
-                            <div id="credit-card-token"></div>
-                        </div>
-
-                        <button type="submit" class="gp-button gp-button-primary gp-button-full">
-                            Generate Token
-                        </button>
-                    </form>
-
-                    <div id="token-result" class="gp-hidden">
-                        <h3 class="gp-card-title gp-mt-lg">Generated Token:</h3>
-                        <div class="gp-code-block" id="token-display"></div>
-                    </div>
+            
+            <div class="row">
+                <div class="half">
+                    <label for="account_type">Account Type:</label>
+                    <select id="account_type" name="account_type" required>
+                        <option value="">Select Account Type</option>
+                        <option value="checking">Checking</option>
+                        <option value="savings">Savings</option>
+                    </select>
+                </div>
+                <div class="half">
+                    <label for="check_type">Check Type:</label>
+                    <select id="check_type" name="check_type" required>
+                        <option value="">Select Check Type</option>
+                        <option value="personal">Personal</option>
+                        <option value="business">Business</option>
+                    </select>
                 </div>
             </div>
-
-            <!-- Webhooks Tab -->
-            <div class="gp-tab-content" id="webhooks">
-                <div class="gp-card">
-                    <div class="gp-card-header">
-                        <h2 class="gp-card-title">Webhook Integration</h2>
-                        <p class="gp-card-description">
-                            Configure and test webhook endpoints for real-time payment notifications.
-                        </p>
-                    </div>
-                    
-                    <div class="gp-code-block">
-// Example webhook handler
-app.post('/webhook', (req, res) => {
-    const signature = req.headers['x-gp-signature'];
-    const payload = req.body;
-    
-    // Verify webhook signature
-    if (verifySignature(payload, signature)) {
-        handlePaymentEvent(payload);
-        res.status(200).send('OK');
-    } else {
-        res.status(400).send('Invalid signature');
-    }
-});
-                    </div>
-
-                    <div class="gp-alert gp-alert-warning">
-                        <strong>Security:</strong> Always verify webhook signatures to ensure requests are from Global Payments.
-                    </div>
-                </div>
+            
+            <div>
+                <label for="billing_zip">Billing Zip Code:</label>
+                <input type="text" id="billing_zip" name="billing_zip" placeholder="12345" maxlength="10">
             </div>
-
-            <!-- Recurring Payments Tab -->
-            <div class="gp-tab-content" id="recurring">
-                <div class="gp-card">
-                    <div class="gp-card-header">
-                        <h2 class="gp-card-title">Recurring Payments</h2>
-                        <p class="gp-card-description">
-                            Set up subscription billing and recurring payment schedules.
-                        </p>
-                    </div>
-                    
-                    <form id="recurring-form" class="gp-form">
-                        <div class="gp-form-row">
-                            <div class="gp-form-group">
-                                <label for="subscription-amount" class="gp-label">Monthly Amount ($):</label>
-                                <input type="number" id="subscription-amount" name="subscription-amount" class="gp-input" min="1.00" step="0.01" value="29.99" required>
-                            </div>
-                            
-                            <div class="gp-form-group">
-                                <label for="billing-cycle" class="gp-label">Billing Cycle:</label>
-                                <select id="billing-cycle" name="billing-cycle" class="gp-select" required>
-                                    <option value="monthly">Monthly</option>
-                                    <option value="quarterly">Quarterly</option>
-                                    <option value="annually">Annually</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="gp-form-group">
-                            <label class="gp-label">Payment Method:</label>
-                            <div id="credit-card-recurring"></div>
-                        </div>
-
-                        <button type="submit" class="gp-button gp-button-primary gp-button-full">
-                            Set Up Subscription
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+            
+            <button type="submit" id="submit-button">Process Payment</button>
+        </form>
     </div>
 
-    <!-- Footer -->
-    <!-- 
-        DEVELOPER NOTE: Update the following footer information to match your business:
-        - Company name and copyright year
-        - Update all links to point to your actual Terms of Service, Privacy Policy, and Refund Policy pages
-        - Refund Policy link is typically required by payment processor underwriting in addition to Terms and Privacy
-        - Ensure all linked policies are accessible and up-to-date before going live
-    -->
-    <footer class="gp-footer">
-        <div class="gp-container">
-            <div class="gp-footer-content">
-                <div class="gp-footer-section">
-                    <p class="gp-footer-copyright">
-                        © 2024 Your Company Name. All rights reserved.
-                    </p>
-                </div>
-                <div class="gp-footer-section">
-                    <nav class="gp-footer-nav">
-                        <a href="/terms-of-service" class="gp-footer-link">Terms of Service</a>
-                        <a href="/privacy-policy" class="gp-footer-link">Privacy Policy</a>
-                        <a href="/refund-policy" class="gp-footer-link">Refund Policy</a>
-                    </nav>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://globalpayments-samples.github.io/js/script.js"></script>
+    <script>
+        // Form validation and submission handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('payment-form');
+            const submitButton = document.getElementById('submit-button');
+            const messageContainer = document.getElementById('message-container');
+            
+            // Real-time validation for routing number (9 digits)
+            const routingNumberInput = document.getElementById('routing_number');
+            routingNumberInput.addEventListener('input', function(e) {
+                const value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                e.target.value = value;
+                
+                if (value.length === 9) {
+                    // Simple routing number checksum validation
+                    const isValid = validateRoutingNumber(value);
+                    e.target.style.borderColor = isValid ? '#4CAF50' : '#f44336';
+                } else {
+                    e.target.style.borderColor = '#cccccc';
+                }
+            });
+            
+            // Real-time validation for account number (digits only)
+            const accountNumberInput = document.getElementById('account_number');
+            accountNumberInput.addEventListener('input', function(e) {
+                const value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                e.target.value = value;
+            });
+            
+            function showMessage(message, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                messageDiv.textContent = message;
+                messageContainer.innerHTML = '';
+                messageContainer.appendChild(messageDiv);
+                
+                // Scroll to message
+                messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // Simple routing number validation using checksum algorithm
+            function validateRoutingNumber(routingNumber) {
+                if (routingNumber.length !== 9) return false;
+                
+                const digits = routingNumber.split('').map(Number);
+                const checksum = (
+                    3 * (digits[0] + digits[3] + digits[6]) +
+                    7 * (digits[1] + digits[4] + digits[7]) +
+                    1 * (digits[2] + digits[5] + digits[8])
+                ) % 10;
+                
+                return checksum === 0;
+            }
+        });
+    </script>
 </body>
 </html>

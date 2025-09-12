@@ -1,6 +1,6 @@
-# Java Card Payment Example
+# Java ACH/eCheck Payment Example
 
-This example demonstrates card payment processing using Jakarta EE and the Global Payments SDK.
+This example demonstrates ACH/eCheck payment processing using Jakarta EE and the Global Payments SDK with direct bank account information.
 
 ## Requirements
 

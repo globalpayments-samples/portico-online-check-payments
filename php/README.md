@@ -1,6 +1,6 @@
-# PHP Card Payment Example
+# PHP ACH/eCheck Payment Example
 
-This example demonstrates card payment processing using PHP and the Global Payments SDK.
+This example demonstrates ACH/eCheck payment processing using PHP and the Global Payments SDK with direct bank account information.
 
 ## Requirements
 
@@ -11,7 +11,7 @@ This example demonstrates card payment processing using PHP and the Global Payme
 ## Project Structure
 
 - `process-payment.php` - Payment processing script
-- `index.php` - Client-side payment form
+- `index.html` - Client-side payment form
 - `composer.json` - Project dependencies
 - `.env.sample` - Template for environment variables
 - `run.sh` - Convenience script to run the application
@@ -69,11 +69,16 @@ Implements comprehensive error handling:
 ## API Endpoints
 
 ### POST /process-payment.php
-Processes a payment using the provided token and billing information.
+Processes an ACH/eCheck payment using direct bank account information.
 
 Request Parameters:
-- `payment_token` (string, required) - Token from client-side SDK
-- `billing_zip` (string, required) - Billing postal code
+- `account_number` (string, required) - Bank account number
+- `routing_number` (string, required) - Bank routing number (9 digits)
+- `account_type` (string, required) - Account type ("checking" or "savings")
+- `check_type` (string, required) - Check type ("personal" or "business")
+- `check_holder_name` (string, required) - Name on the account
+- `amount` (number, required) - Payment amount
+- `billing_zip` (string, optional) - Billing zip code
 
 Response (Success):
 ```
@@ -87,13 +92,11 @@ Error: [error message]
 
 ## Security Considerations
 
-This example demonstrates basic implementation. For production use, consider:
-- Implementing additional input validation
-- Adding request rate limiting
-- Including security headers
-- Implementing proper logging
-- Adding payment fraud prevention measures
-- Using HTTPS in production
-- Implementing CSRF protection
-- Configuring proper session handling
-- Setting appropriate PHP security directives
+This example demonstrates ACH/eCheck processing with security best practices. For production use, consider:
+- **HTTPS Encryption** - Secure transmission of bank account data
+- **Enhanced Validation** - Additional routing number and account validation
+- **Rate Limiting** - Protection against automated attacks
+- **CSRF Protection** - Cross-site request forgery prevention
+- **Session Security** - Proper session handling and timeout
+- **NACHA Compliance** - Adherence to ACH processing regulations
+- **Error Logging** - Secure logging without exposing sensitive data
