@@ -26,7 +26,7 @@ use GlobalPayments\Api\Entities\Enums\AccountType;
 use GlobalPayments\Api\Entities\Enums\CheckType;
 use GlobalPayments\Api\Entities\Enums\SecCode;
 use GlobalPayments\Api\Entities\Exceptions\ApiException;
-use GlobalPayments\Api\PaymentMethods\eCheck;
+use GlobalPayments\Api\PaymentMethods\ECheck;
 use GlobalPayments\Api\ServiceConfigs\Gateways\PorticoConfig;
 use GlobalPayments\Api\ServicesContainer;
 
@@ -156,7 +156,7 @@ try {
     }
 
     // Initialize eCheck payment data using direct bank account information
-    $check = new eCheck();
+    $check = new ECheck();
     $check->accountNumber = $accountNumber;
     $check->routingNumber = $routingNumber;
     $check->accountType = $accountType;
