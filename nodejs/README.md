@@ -1,133 +1,202 @@
-# Node.js ACH/eCheck Payment Example
+# Node.js — ACH/eCheck Payments
 
-This example demonstrates ACH/eCheck payment processing using Express.js and the Global Payments SDK with direct bank account information.
+Node.js/Express implementation of ACH/eCheck payment processing using the Global Payments Portico gateway. Processes electronic check payments via direct bank account entry with server-side routing number validation.
+
+---
 
 ## Requirements
 
-- Node.js 14.x or later
-- npm (Node Package Manager)
-- Global Payments account and API credentials
+- Node.js 18+
+- npm
+- Global Payments Portico credentials (`PUBLIC_API_KEY`, `SECRET_API_KEY`)
+
+---
 
 ## Project Structure
 
-- `server.js` - Main application file containing server setup and ACH/eCheck payment processing
-- `index.html` - Client-side bank account information form
-- `package.json` - Project dependencies and scripts
-- `.env.sample` - Template for environment variables
-- `run.sh` - Convenience script to run the application
+```
+nodejs/
+├── .env.sample     # Environment variable template
+├── package.json    # Dependencies (globalpayments-api ^3.10.6)
+├── Dockerfile
+├── run.sh
+├── server.js       # Express app: /config, /process-payment
+└── index.html      # Shared frontend
+```
+
+---
 
 ## Setup
 
-1. Clone this repository
-2. Copy `.env.sample` to `.env`
-3. Update `.env` with your Global Payments credentials:
-   ```
-   PUBLIC_API_KEY=pk_test_xxx
-   SECRET_API_KEY=sk_test_xxx
-   ```
-4. Install dependencies:
-   ```bash
-   npm install
-   ```
-5. Run the application:
-   ```bash
-   ./run.sh
-   ```
-   Or manually:
-   ```bash
-   node server.js
-   ```
+```bash
+cp .env.sample .env
+```
 
-## Implementation Details
+Edit `.env`:
 
-### Server Setup
-The application uses Express.js to create a web server that:
-- Serves static files for the bank account form
-- Processes ACH/eCheck payment requests
-- Provides configuration endpoint for direct entry processing
-- Handles JSON and form-encoded requests
+```env
+PUBLIC_API_KEY=pkapi_cert_your_key_here
+SECRET_API_KEY=skapi_cert_your_key_here
+```
+
+Install dependencies and start:
+
+```bash
+npm install
+npm start
+```
+
+Open: http://localhost:8001
+
+---
+
+## Docker
+
+```bash
+docker build -t portico-check-nodejs .
+docker run -p 8001:8000 --env-file ../.env portico-check-nodejs
+```
+
+---
+
+## Implementation
 
 ### SDK Configuration
-Global Payments SDK configuration using environment variables:
-- Loads credentials from .env file
-- Sets up service URL for API communication
-- Configures Portico gateway for ACH processing
 
-### Payment Processing
-ACH/eCheck payment processing flow:
-1. Client submits bank account details (account number, routing number, account type)
-2. Server validates routing number using checksum algorithm
-3. Creates eCheck payment method with bank account information
-4. Processes ACH charge with specified amount
-5. Returns success/error response with transaction details
+```js
+import { ServicesContainer, PorticoConfig } from 'globalpayments-api';
 
-### Error Handling
-Implements comprehensive error handling:
-- Routing number validation with checksum verification
-- Account number sanitization and validation
-- API exception handling with structured error responses
-- Input validation for required fields
+const config = new PorticoConfig();
+config.secretApiKey = process.env.SECRET_API_KEY;
+config.serviceUrl   = 'https://cert.api2.heartlandportico.com';
+ServicesContainer.configureService(config);
+```
+
+### Payment Flow
+
+```
+POST /process-payment
+  │
+  ├─ Validate required fields
+  ├─ validateRoutingNumber() — ABA checksum algorithm
+  ├─ sanitizeAccountNumber() — strip non-digits
+  ├─ Build ECheck object
+  │   ├─ accountNumber / routingNumber
+  │   ├─ accountType  (AccountType.Checking | Savings)
+  │   ├─ checkType    (CheckType.Personal | Business)
+  │   ├─ entryMode    (EntryMethod.Manual)
+  │   ├─ checkName
+  │   └─ secCode      (SecCode.WEB)
+  └─ check.charge(amount).withCurrency('USD').execute()
+```
+
+### Routing Number Validation
+
+```js
+const checksum = (
+  3 * (d[0] + d[3] + d[6]) +
+  7 * (d[1] + d[4] + d[7]) +
+  1 * (d[2] + d[5] + d[8])
+) % 10;
+// Valid if checksum === 0
+```
+
+---
 
 ## API Endpoints
 
-### GET /config
-Returns configuration for direct bank account entry processing.
+### `GET /config`
 
-Response:
+Returns direct-entry flag. No public key exposed — ACH/eCheck is server-side only.
+
+**Response:**
 ```json
 {
-    "success": true,
-    "data": {
-        "directEntry": true,
-        "message": "Direct bank account entry enabled"
-    }
+  "success": true,
+  "data": {
+    "directEntry": true,
+    "message": "Direct bank account entry enabled"
+  }
 }
 ```
 
-### POST /process-payment
-Processes an ACH/eCheck payment using direct bank account information.
+---
 
-Request Parameters:
-- `account_number` (string, required) - Bank account number
-- `routing_number` (string, required) - Bank routing number (9 digits)
-- `account_type` (string, required) - Account type ("checking" or "savings")
-- `check_type` (string, required) - Check type ("personal" or "business")
-- `check_holder_name` (string, required) - Name on the account
-- `amount` (number, required) - Payment amount
-- `billing_zip` (string, optional) - Billing zip code
+### `POST /process-payment`
 
-Response (Success):
+Processes an ACH/eCheck charge.
+
+**Request body:**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `account_number` | Yes | Bank account number |
+| `routing_number` | Yes | 9-digit ABA routing number |
+| `account-type` | Yes | `checking` or `savings` |
+| `check-type` | Yes | `personal` or `business` |
+| `check_holder_name` | Yes | Name on the account |
+| `amount` | Yes | Positive decimal |
+| `billing_zip` | No | Postal code for AVS |
+
+**Success (`200`):**
 ```json
 {
-    "success": true,
-    "message": "Payment successful! Transaction ID: xxx",
-    "data": {
-        "transactionId": "xxx",
-        "responseCode": "00",
-        "responseMessage": "Success"
-    }
+  "success": true,
+  "message": "Payment successful! Transaction ID: 1234567890",
+  "data": {
+    "transactionId": "1234567890",
+    "responseCode": "00",
+    "responseMessage": "Transaction Approved"
+  }
 }
 ```
 
-Response (Error):
+**Error (`400`):**
 ```json
 {
-    "success": false,
-    "message": "Payment processing failed",
-    "error": {
-        "code": "VALIDATION_ERROR",
-        "details": "Invalid routing number"
-    }
+  "success": false,
+  "message": "Payment processing failed",
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "details": "Invalid routing number"
+  }
 }
 ```
 
-## Security Considerations
+---
 
-This example demonstrates ACH/eCheck processing with security best practices. For production use, consider:
-- **HTTPS Encryption** - Secure transmission of bank account data
-- **Input Validation** - Enhanced validation beyond routing number checksums
-- **Rate Limiting** - Protection against automated attacks
-- **Fraud Prevention** - Additional verification and risk assessment
-- **Logging and Monitoring** - Transaction tracking and anomaly detection
-- **NACHA Compliance** - Adherence to ACH processing regulations
-- **Data Retention** - Secure handling and disposal of sensitive bank data
+## Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `PUBLIC_API_KEY` | Portico public key | `pkapi_cert_jKc1Ft...` |
+| `SECRET_API_KEY` | Portico secret key (used for SDK auth) | `skapi_cert_MTyM...` |
+| `PORT` | Server port (default: `8000`) | `8000` |
+
+---
+
+## Test Values
+
+| Field | Value |
+|-------|-------|
+| Account Number | `12345678901` |
+| Routing Number | `122105155` |
+| Account Type | `checking` |
+| Check Type | `personal` |
+| Amount | Any positive decimal |
+
+---
+
+## Troubleshooting
+
+**`Invalid routing number`**
+Use `122105155` — passes ABA checksum. Other numbers will be rejected before the API call.
+
+**Port 8001 in use**
+Set `PORT=8002` in `.env` or change the host mapping in `docker-compose.yml`.
+
+**`MODULE_NOT_FOUND` error**
+Run `npm install` before starting.
+
+**Credentials error from Portico**
+Confirm `SECRET_API_KEY` starts with `skapi_cert_` for sandbox.

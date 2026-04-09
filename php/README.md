@@ -1,102 +1,199 @@
-# PHP ACH/eCheck Payment Example
+# PHP — ACH/eCheck Payments
 
-This example demonstrates ACH/eCheck payment processing using PHP and the Global Payments SDK with direct bank account information.
+PHP implementation of ACH/eCheck payment processing using the Global Payments Portico gateway. Processes electronic check payments via direct bank account entry — no card tokenization required.
+
+---
 
 ## Requirements
 
-- PHP 7.4 or later
+- PHP 8.0+
 - Composer
-- Global Payments account and API credentials
+- Global Payments Portico credentials (`PUBLIC_API_KEY`, `SECRET_API_KEY`)
+
+---
 
 ## Project Structure
 
-- `process-payment.php` - Payment processing script
-- `index.html` - Client-side payment form
-- `composer.json` - Project dependencies
-- `.env.sample` - Template for environment variables
-- `run.sh` - Convenience script to run the application
+```
+php/
+├── .env.sample         # Environment variable template
+├── composer.json       # Dependencies (globalpayments/php-sdk ^13.1)
+├── Dockerfile
+├── run.sh
+├── config.php          # GET /config.php
+├── process-payment.php # POST /process-payment.php
+└── index.html          # Shared frontend
+```
+
+---
 
 ## Setup
 
-1. Clone this repository
-2. Copy `.env.sample` to `.env`
-3. Update `.env` with your Global Payments credentials:
-   ```
-   PUBLIC_API_KEY=pk_test_xxx
-   SECRET_API_KEY=sk_test_xxx
-   ```
-4. Install dependencies:
-   ```bash
-   composer install
-   ```
-5. Run the application:
-   ```bash
-   ./run.sh
-   ```
-   Or manually:
-   ```bash
-   php -S localhost:8000
-   ```
+```bash
+cp .env.sample .env
+```
 
-## Implementation Details
+Edit `.env`:
 
-### Application Structure
-The application uses a simple PHP structure:
-- Static HTML form for payment collection
-- Separate PHP script for payment processing
-- Composer for dependency management
+```env
+PUBLIC_API_KEY=pkapi_cert_your_key_here
+SECRET_API_KEY=skapi_cert_your_key_here
+```
+
+Install dependencies and start:
+
+```bash
+composer install
+php -S localhost:8003
+```
+
+Open: http://localhost:8003
+
+Or use the convenience script:
+
+```bash
+./run.sh
+```
+
+---
+
+## Docker
+
+```bash
+docker build -t portico-check-php .
+docker run -p 8003:8000 --env-file ../.env portico-check-php
+```
+
+---
+
+## Implementation
 
 ### SDK Configuration
-Global Payments SDK configuration using environment variables:
-- Loads credentials from .env file
-- Sets up service URL for API communication
-- Configures developer identification
 
-### Payment Processing
-Payment processing flow:
-1. Client submits payment token and billing zip
-2. Server creates CreditCardData with token
-3. Creates Address with postal code
-4. Processes $10 USD charge
-5. Returns success/error response
+```php
+use GlobalPayments\Api\ServiceConfigs\Gateways\PorticoConfig;
+use GlobalPayments\Api\ServicesContainer;
 
-### Error Handling
-Implements comprehensive error handling:
-- Catches and processes API exceptions
-- Returns appropriate error messages
-- Handles edge cases gracefully
+$config = new PorticoConfig();
+$config->secretApiKey = $_ENV['SECRET_API_KEY'];
+$config->serviceUrl   = 'https://cert.api2.heartlandportico.com';
+ServicesContainer::configureService($config);
+```
+
+### Payment Flow
+
+```
+POST /process-payment.php
+  │
+  ├─ Validate required fields
+  ├─ Validate routing number (ABA checksum)
+  ├─ Sanitize account number
+  ├─ Build ECheck object
+  │   ├─ accountNumber
+  │   ├─ routingNumber
+  │   ├─ accountType (Checking | Savings)
+  │   ├─ checkType   (Personal | Business)
+  │   ├─ entryMode   (Manual)
+  │   ├─ checkName
+  │   └─ secCode     (WEB)
+  └─ ECheck::charge($amount)->withCurrency('USD')->execute()
+```
+
+---
 
 ## API Endpoints
 
-### POST /process-payment.php
-Processes an ACH/eCheck payment using direct bank account information.
+### `GET /config.php`
 
-Request Parameters:
-- `account_number` (string, required) - Bank account number
-- `routing_number` (string, required) - Bank routing number (9 digits)
-- `account_type` (string, required) - Account type ("checking" or "savings")
-- `check_type` (string, required) - Check type ("personal" or "business")
-- `check_holder_name` (string, required) - Name on the account
-- `amount` (number, required) - Payment amount
-- `billing_zip` (string, optional) - Billing zip code
+Returns direct-entry flag. No public key is exposed — ACH/eCheck is processed entirely server-side.
 
-Response (Success):
-```
-Payment successful! Transaction ID: xxx
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "directEntry": true,
+    "message": "Direct bank account entry enabled"
+  }
+}
 ```
 
-Response (Error):
-```
-Error: [error message]
+---
+
+### `POST /process-payment.php`
+
+Processes an ACH/eCheck charge.
+
+**Request fields:**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `account_number` | Yes | Bank account number |
+| `routing_number` | Yes | 9-digit ABA routing number |
+| `account-type` | Yes | `checking` or `savings` |
+| `check-type` | Yes | `personal` or `business` |
+| `check_holder_name` | Yes | Name on the account |
+| `amount` | Yes | Positive decimal |
+| `billing_zip` | No | Postal code for AVS |
+
+**Success (`200`):**
+```json
+{
+  "success": true,
+  "message": "Payment successful! Transaction ID: 1234567890",
+  "data": {
+    "transactionId": "1234567890",
+    "responseCode": "00",
+    "responseMessage": "Transaction Approved"
+  }
+}
 ```
 
-## Security Considerations
+**Error (`400`):**
+```json
+{
+  "success": false,
+  "message": "Payment processing failed",
+  "error": {
+    "code": "PAYMENT_DECLINED",
+    "details": "Invalid routing number"
+  }
+}
+```
 
-This example demonstrates ACH/eCheck processing with security best practices. For production use, consider:
-- **HTTPS Encryption** - Secure transmission of bank account data
-- **Enhanced Validation** - Additional routing number and account validation
-- **Rate Limiting** - Protection against automated attacks
-- **CSRF Protection** - Cross-site request forgery prevention
-- **Session Security** - Proper session handling and timeout
-- **NACHA Compliance** - Adherence to ACH processing regulations
-- **Error Logging** - Secure logging without exposing sensitive data
+---
+
+## Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `PUBLIC_API_KEY` | Portico public key | `pkapi_cert_jKc1Ft...` |
+| `SECRET_API_KEY` | Portico secret key (used for SDK auth) | `skapi_cert_MTyM...` |
+
+---
+
+## Test Values
+
+| Field | Value |
+|-------|-------|
+| Account Number | `12345678901` |
+| Routing Number | `122105155` |
+| Account Type | `checking` |
+| Check Type | `personal` |
+| Amount | Any positive decimal |
+
+---
+
+## Troubleshooting
+
+**`composer: command not found`**
+Install Composer: https://getcomposer.org/download/
+
+**`Invalid routing number`**
+Use `122105155` — a valid ABA routing number that passes checksum validation.
+
+**Port 8003 in use**
+Change the port: `php -S localhost:8004`
+
+**Credentials error**
+Confirm `SECRET_API_KEY` starts with `skapi_cert_` for sandbox or `skapi_prod_` for production.
