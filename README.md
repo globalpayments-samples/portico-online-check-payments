@@ -1,6 +1,6 @@
 # Portico ACH/eCheck Payments
 
-A complete ACH/eCheck payment implementation using the Global Payments Portico gateway. Developers can process electronic check payments using direct bank account information — account number, routing number, and account type — without card tokenization.
+A complete ACH/eCheck payment implementation using the Global Payments Portico gateway. Developers can process electronic check payments using direct bank account information — account number, routing number, and account type — without card tokenization. All implementations use the official Global Payments SDK (`PorticoConfig`).
 
 Available in four languages: PHP, Node.js, .NET, and Java.
 
