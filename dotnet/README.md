@@ -1,113 +1,192 @@
-# .NET ACH/eCheck Payment Example
+# .NET — ACH/eCheck Payments
 
-This example demonstrates ACH/eCheck payment processing using ASP.NET Core and the Global Payments SDK with direct bank account information.
+ASP.NET Core implementation of ACH/eCheck payment processing using the Global Payments Portico gateway. Processes electronic check payments via direct bank account entry — no card tokenization required.
+
+---
 
 ## Requirements
 
-- .NET 6.0 or later
-- Global Payments account and API credentials
+- .NET 8.0 SDK
+- Global Payments Portico credentials (`PUBLIC_API_KEY`, `SECRET_API_KEY`)
+
+---
 
 ## Project Structure
 
-- `Program.cs` - Main application file containing server setup and payment processing
-- `wwwroot/index.html` - Client-side payment form
-- `.env.sample` - Template for environment variables
-- `run.sh` - Convenience script to run the application
-- `appsettings.json` - Application configuration file
+```
+dotnet/
+├── .env.sample         # Environment variable template
+├── dotnet.csproj       # Dependencies (GlobalPayments.Api 9.0.16)
+├── Program.cs          # ASP.NET Core minimal API: /config, /process-payment
+├── appsettings.json
+├── Dockerfile
+├── run.sh
+└── wwwroot/            # Static frontend files
+```
+
+---
 
 ## Setup
 
-1. Clone this repository
-2. Copy `.env.sample` to `.env`
-3. Update `.env` with your Global Payments credentials:
-   ```
-   PUBLIC_API_KEY=pk_test_xxx
-   SECRET_API_KEY=sk_test_xxx
-   ```
-4. Install dependencies:
-   ```bash
-   dotnet restore
-   ```
-5. Run the application:
-   ```bash
-   ./run.sh
-   ```
-   Or manually:
-   ```bash
-   dotnet run
-   ```
+```bash
+cp .env.sample .env
+```
 
-## Implementation Details
+Edit `.env`:
 
-### Server Setup
-The application uses ASP.NET Core's minimal API approach to create a lightweight web server that:
-- Serves static files from wwwroot directory
-- Processes payment requests
-- Provides configuration endpoint for client-side SDK
+```env
+PUBLIC_API_KEY=pkapi_cert_your_key_here
+SECRET_API_KEY=skapi_cert_your_key_here
+```
+
+Install and run:
+
+```bash
+dotnet restore
+dotnet run
+```
+
+Open: http://localhost:8006
+
+---
+
+## Docker
+
+```bash
+docker build -t portico-check-dotnet .
+docker run -p 8006:8000 --env-file ../.env portico-check-dotnet
+```
+
+---
+
+## Implementation
 
 ### SDK Configuration
-The Global Payments SDK is configured using environment variables and the PorticoConfig class:
-- Loads credentials from .env file
-- Sets up service URL for API communication
-- Configures developer identification
 
-### Payment Processing
-Payment processing flow:
-1. Client submits payment token and billing zip
-2. Server creates CreditCardData with token
-3. Creates Address with postal code
-4. Processes $10 USD charge
-5. Returns success/error response
+```csharp
+using GlobalPayments.Api;
+using GlobalPayments.Api.ServiceConfigs.Gateways;
 
-### Error Handling
-Implements comprehensive error handling:
-- Catches and processes API exceptions
-- Returns appropriate HTTP status codes
-- Provides meaningful error messages
+var config = new PorticoConfig
+{
+    SecretApiKey = Environment.GetEnvironmentVariable("SECRET_API_KEY"),
+    ServiceUrl   = "https://cert.api2.heartlandportico.com"
+};
+ServicesContainer.ConfigureService(config);
+```
+
+### Payment Flow
+
+```
+POST /process-payment
+  │
+  ├─ Validate required fields
+  ├─ Validate routing number (ABA checksum)
+  ├─ Build ECheck object
+  │   ├─ AccountNumber / RoutingNumber
+  │   ├─ AccountType  (Checking | Savings)
+  │   ├─ CheckType    (Personal | Business)
+  │   ├─ EntryMode    (Manual)
+  │   ├─ CheckName
+  │   └─ SecCode      (WEB)
+  └─ eCheck.Charge(amount).WithCurrency("USD").Execute()
+```
+
+---
 
 ## API Endpoints
 
-### GET /config
-Returns public API key for client-side SDK initialization.
+### `GET /config`
 
-Response:
+Returns direct-entry flag. No public key exposed — ACH/eCheck is server-side only.
+
+**Response:**
 ```json
 {
-    "publicApiKey": "pk_test_xxx"
+  "success": true,
+  "data": {
+    "directEntry": true,
+    "message": "Direct bank account entry enabled"
+  }
 }
 ```
 
-### POST /process-payment
-Processes an ACH/eCheck payment using direct bank account information.
+---
 
-Request Parameters:
-- `account_number` (string, required) - Bank account number
-- `routing_number` (string, required) - Bank routing number (9 digits)
-- `account_type` (string, required) - Account type ("checking" or "savings")
-- `check_type` (string, required) - Check type ("personal" or "business")
-- `check_holder_name` (string, required) - Name on the account
-- `amount` (number, required) - Payment amount
-- `billing_zip` (string, optional) - Billing zip code
+### `POST /process-payment`
 
-Response (Success):
+Processes an ACH/eCheck charge.
+
+**Request fields:**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `account_number` | Yes | Bank account number |
+| `routing_number` | Yes | 9-digit ABA routing number |
+| `account-type` | Yes | `checking` or `savings` |
+| `check-type` | Yes | `personal` or `business` |
+| `check_holder_name` | Yes | Name on the account |
+| `amount` | Yes | Positive decimal |
+| `billing_zip` | No | Postal code for AVS |
+
+**Success (`200`):**
 ```json
 {
-    "message": "Payment successful! Transaction ID: xxx"
+  "success": true,
+  "message": "Payment successful! Transaction ID: 1234567890",
+  "data": {
+    "transactionId": "1234567890",
+    "responseCode": "00",
+    "responseMessage": "Transaction Approved"
+  }
 }
 ```
 
-Response (Error):
+**Error (`400`):**
 ```json
 {
-    "detail": "Error message"
+  "success": false,
+  "message": "Payment processing failed",
+  "error": {
+    "code": "PAYMENT_DECLINED",
+    "details": "Invalid routing number"
+  }
 }
 ```
 
-## Security Considerations
+---
 
-This example demonstrates basic implementation. For production use, consider:
-- Implementing additional input validation
-- Adding request rate limiting
-- Including security headers
-- Implementing proper logging
-- Adding payment fraud prevention measures
+## Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `PUBLIC_API_KEY` | Portico public key | `pkapi_cert_jKc1Ft...` |
+| `SECRET_API_KEY` | Portico secret key (used for SDK auth) | `skapi_cert_MTyM...` |
+
+---
+
+## Test Values
+
+| Field | Value |
+|-------|-------|
+| Account Number | `12345678901` |
+| Routing Number | `122105155` |
+| Account Type | `checking` |
+| Check Type | `personal` |
+| Amount | Any positive decimal |
+
+---
+
+## Troubleshooting
+
+**`dotnet: command not found`**
+Install the .NET 8.0 SDK from https://dotnet.microsoft.com/download
+
+**`Invalid routing number`**
+Use `122105155` — a valid ABA routing number. Others will be rejected before the API call.
+
+**Port 8006 in use**
+Change `ASPNETCORE_URLS` in `.env` or update the port mapping in `docker-compose.yml`.
+
+**Package restore fails**
+Run `dotnet restore` to download NuGet dependencies before `dotnet run`.
