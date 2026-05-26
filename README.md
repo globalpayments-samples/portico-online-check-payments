@@ -4,6 +4,8 @@ A complete ACH/eCheck payment implementation using the Global Payments Portico g
 
 Available in four languages: PHP, Node.js, .NET, and Java.
 
+---
+
 ## Features
 
 - ACH/eCheck processing via Portico
@@ -11,6 +13,8 @@ Available in four languages: PHP, Node.js, .NET, and Java.
 - ABA routing number validation
 - 4-language implementations (PHP, Node.js, .NET, Java)
 - Docker support
+
+---
 
 ## Available Implementations
 
@@ -27,6 +31,8 @@ Preview links (runs in browser via CodeSandbox):
 - [.NET Preview](https://githubbox.com/globalpayments-samples/portico-online-check-payments/tree/main/dotnet)
 - [Java Preview](https://githubbox.com/globalpayments-samples/portico-online-check-payments/tree/main/java)
 
+---
+
 ## How It Works
 
 ACH/eCheck payments are processed entirely server-side. Unlike card payments, there is no client-side tokenization step — the customer enters bank account details directly into the form, and the backend constructs an `ECheck` object and submits it to Portico.
@@ -42,7 +48,7 @@ Browser
   │   account_number, routing_number,
   │   account_type, check_type, name
   │
-  ├─ POST /process-payment ────────► Server
+  └─ POST /process-payment ────────► Server
       { account_number, routing_number,  └─ Validates routing checksum
         account-type, check-type,        └─ Builds ECheck object
         check_holder_name, amount }      └─ SDK: ECheck.charge().execute()
@@ -52,6 +58,8 @@ Browser
 ### Routing Number Validation
 
 All implementations validate routing numbers using the standard ABA checksum algorithm before sending to the gateway. Invalid routing numbers are rejected client-side with a clear error before any API call is made.
+
+---
 
 ## Prerequisites
 
@@ -64,6 +72,8 @@ All implementations validate routing numbers using the standard ABA checksum alg
   - Node.js 18+ with npm
   - .NET 8.0 SDK
   - Java 17+ with Maven
+
+---
 
 ## Quick Start
 
@@ -125,6 +135,8 @@ Open: http://localhost:8004
 3. Fill in routing number, account type, check type, and amount
 4. Click **Submit** — confirm the `transactionId` in the response
 
+---
+
 ## Docker Setup
 
 Run all four implementations simultaneously:
@@ -149,6 +161,8 @@ Run integration tests:
 ```bash
 docker-compose --profile testing up
 ```
+
+---
 
 ## API Endpoints
 
@@ -219,6 +233,8 @@ Processes an ACH/eCheck payment using direct bank account data.
 }
 ```
 
+---
+
 ## Test Accounts
 
 Use these in sandbox environments. Portico sandbox does not validate real account numbers — use any plausible format.
@@ -232,6 +248,8 @@ Use these in sandbox environments. Portico sandbox does not validate real accoun
 | Amount | Any positive decimal |
 
 > Sandbox transactions do not move real money. Use sandbox credentials only.
+
+---
 
 ## Project Structure
 
@@ -272,6 +290,8 @@ portico-online-check-payments/
         └── main/java/com/globalpayments/example/
 ```
 
+---
+
 ## Environment Variables
 
 | Variable | Description | Example |
@@ -280,6 +300,8 @@ portico-online-check-payments/
 | `SECRET_API_KEY` | Portico secret key for server-side SDK auth | `skapi_cert_MTyM...` |
 
 > Note: For ACH/eCheck, only `SECRET_API_KEY` is used for transaction processing. `PUBLIC_API_KEY` is present for consistency with other Portico projects.
+
+---
 
 ## Troubleshooting
 
@@ -301,6 +323,8 @@ Requires Java 17+ and Maven 3.8+. Verify with `java -version` and `mvn -version`
 **.NET — missing packages**
 Run `dotnet restore` before `dotnet run`.
 
+---
+
 ## Security Considerations
 
 - Store credentials in `.env` files, never commit to source control
@@ -308,6 +332,8 @@ Run `dotnet restore` before `dotnet run`.
 - All payment processing happens server-side
 - Use HTTPS in production
 - Bank account numbers handled server-side only
+
+---
 
 ## Resources
 
@@ -318,12 +344,16 @@ Run `dotnet restore` before `dotnet run`.
 - [.NET SDK](https://github.com/globalpayments/dotnet-sdk)
 - [Java SDK](https://github.com/globalpayments/java-sdk)
 
+---
+
 ## Per-Language READMEs
 
 - [PHP](./php/README.md)
 - [Node.js](./nodejs/README.md)
 - [.NET](./dotnet/README.md)
 - [Java](./java/README.md)
+
+---
 
 ## Community
 
@@ -334,6 +364,8 @@ Run `dotnet restore` before `dotnet run`.
 - 💼 **LinkedIn** — [Global Payments for Developers](https://www.linkedin.com/showcase/global-payments-for-developers/posts/?feedView=all)
 
 Have a question or found a bug? [Open an issue](https://github.com/globalpayments-samples/portico-online-check-payments/issues) or reach out at [communityexperience@globalpay.com](mailto:communityexperience@globalpay.com).
+
+---
 
 ## License
 
