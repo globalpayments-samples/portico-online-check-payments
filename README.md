@@ -6,6 +6,16 @@ Available in four languages: PHP, Node.js, .NET, and Java.
 
 ---
 
+## Features
+
+- ACH/eCheck processing via Portico
+- Checking and savings account support
+- ABA routing number validation
+- 4-language implementations (PHP, Node.js, .NET, Java)
+- Docker support
+
+---
+
 ## Available Implementations
 
 | Language | Framework | SDK Version |
@@ -171,8 +181,6 @@ Returns minimal configuration for the payment form. No public key is returned be
 }
 ```
 
----
-
 ### `POST /process-payment`
 
 Processes an ACH/eCheck payment using direct bank account data.
@@ -314,6 +322,38 @@ Requires Java 17+ and Maven 3.8+. Verify with `java -version` and `mvn -version`
 
 **.NET — missing packages**
 Run `dotnet restore` before `dotnet run`.
+
+---
+
+## Security Considerations
+
+- Store credentials in `.env` files, never commit to source control
+- API keys never exposed to the frontend
+- All payment processing happens server-side
+- Use HTTPS in production
+- Bank account numbers handled server-side only
+
+---
+
+## Resources
+
+- [Global Payments Developer Portal](https://developer.globalpayments.com/)
+- [GP-API Reference](https://developer.globalpayments.com/api/references-overview)
+- [PHP SDK](https://github.com/globalpayments/php-sdk)
+- [Node.js SDK](https://github.com/globalpayments/node-sdk)
+- [.NET SDK](https://github.com/globalpayments/dotnet-sdk)
+- [Java SDK](https://github.com/globalpayments/java-sdk)
+
+---
+
+## Per-Language READMEs
+
+- [PHP](./php/README.md)
+- [Node.js](./nodejs/README.md)
+- [.NET](./dotnet/README.md)
+- [Java](./java/README.md)
+
+---
 
 ## Community
 
