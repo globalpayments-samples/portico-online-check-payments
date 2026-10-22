@@ -102,10 +102,9 @@ SECRET_API_KEY=skapi_cert_your_key_here
 
 **PHP:**
 ```bash
-composer install
-php -S localhost:8003
+./run.sh
 ```
-Open: http://localhost:8003
+Open the local URL printed by the PHP server.
 
 **Node.js:**
 ```bash

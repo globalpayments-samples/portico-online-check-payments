@@ -6,7 +6,7 @@ PHP implementation of ACH/eCheck payment processing using the Global Payments Po
 
 ## Requirements
 
-- PHP 8.0+
+- PHP 8.2.35+, 8.3.36+, 8.4.27+, or 8.5.12+ for the web server
 - Composer
 - Global Payments Portico credentials (`PUBLIC_API_KEY`, `SECRET_API_KEY`)
 
@@ -44,7 +44,7 @@ Install dependencies and start:
 
 ```bash
 composer install
-php -S localhost:8003
+PORT=8003 ./run.sh
 ```
 
 Open: http://localhost:8003
@@ -193,7 +193,7 @@ Install Composer: https://getcomposer.org/download/
 Use `122105155` — a valid ABA routing number that passes checksum validation.
 
 **Port 8003 in use**
-Change the port: `php -S localhost:8004`
+Set `PORT=8004` before `./run.sh`
 
 **Credentials error**
 Confirm `SECRET_API_KEY` starts with `skapi_cert_` for sandbox or `skapi_prod_` for production.
