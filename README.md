@@ -68,7 +68,7 @@ All implementations validate routing numbers using the standard ABA checksum alg
   - `PUBLIC_API_KEY` — prefixed `pkapi_cert_...` (sandbox) or `pkapi_prod_...` (production)
   - `SECRET_API_KEY` — prefixed `skapi_cert_...` (sandbox) or `skapi_prod_...` (production)
 - Docker (for multi-service setup), or a local runtime for your chosen language:
-  - PHP 8.0+ with Composer
+  - PHP 8.2.35+, 8.3.36+, 8.4.27+, or 8.5.12+ with Composer
   - Node.js 18+ with npm
   - .NET 8.0 SDK
   - Java 17+ with Maven
@@ -102,10 +102,9 @@ SECRET_API_KEY=skapi_cert_your_key_here
 
 **PHP:**
 ```bash
-composer install
-php -S localhost:8003
+./run.sh
 ```
-Open: http://localhost:8003
+Open the local URL printed by the PHP server.
 
 **Node.js:**
 ```bash
