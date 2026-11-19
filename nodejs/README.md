@@ -6,7 +6,7 @@ Node.js/Express implementation of ACH/eCheck payment processing using the Global
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 24+
 - npm
 - Global Payments Portico credentials (`PUBLIC_API_KEY`, `SECRET_API_KEY`)
 
