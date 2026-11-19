@@ -71,7 +71,7 @@ All implementations validate routing numbers using the standard ABA checksum alg
   - PHP 8.2.35+, 8.3.36+, 8.4.27+, or 8.5.12+ with Composer
   - Node.js 24+ with npm
   - .NET 8.0 SDK
-  - Java 17+ with Maven
+  - Java 21+ with Maven
 
 ---
 
@@ -317,7 +317,7 @@ Stop the conflicting process (`lsof -i :8001`) or change the port mapping in `do
 Install Composer: `curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer`
 
 **Java build fails**
-Requires Java 17+ and Maven 3.8+. Verify with `java -version` and `mvn -version`.
+Requires Java 21+ and Maven 3.8+. Verify with `java -version` and `mvn -version`.
 
 **.NET — missing packages**
 Run `dotnet restore` before `dotnet run`.

@@ -6,7 +6,7 @@ Jakarta EE servlet implementation of ACH/eCheck payment processing using the Glo
 
 ## Requirements
 
-- Java 17+
+- Java 21+
 - Maven 3.8+
 - Global Payments Portico credentials (`PUBLIC_API_KEY`, `SECRET_API_KEY`)
 
@@ -179,7 +179,7 @@ Processes an ACH/eCheck charge.
 ## Troubleshooting
 
 **`java: command not found`**
-Install Java 17+: https://adoptium.net
+Install Java 21+: https://adoptium.net
 
 **`mvn: command not found`**
 Install Maven 3.8+: https://maven.apache.org/download.cgi
