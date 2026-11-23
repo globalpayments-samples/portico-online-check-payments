@@ -262,13 +262,12 @@ public class ProcessPaymentServlet extends HttpServlet {
             );
             response.getWriter().write(errorResponse);
         } catch (Exception e) {
-            // Handle unexpected errors
+            // Log unexpected errors on the server and return a generic message
+            getServletContext().log("Unexpected error while processing payment", e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            String errorResponse = String.format(
-                "{\"success\":false,\"message\":\"Internal server error\",\"error\":{\"code\":\"INTERNAL_ERROR\",\"details\":\"%s\"}}", 
-                e.getMessage()
+            response.getWriter().write(
+                "{\"success\":false,\"message\":\"Internal server error\",\"error\":{\"code\":\"INTERNAL_ERROR\",\"details\":\"An unexpected error occurred\"}}"
             );
-            response.getWriter().write(errorResponse);
         }
     }
 }
