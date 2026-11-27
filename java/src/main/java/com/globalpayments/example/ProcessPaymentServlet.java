@@ -73,7 +73,8 @@ public class ProcessPaymentServlet extends HttpServlet {
         if (postalCode == null || postalCode.trim().isEmpty()) {
             return "";
         }
-        return postalCode.replaceAll("[^a-zA-Z0-9-]", "").substring(0, Math.min(postalCode.length(), 10));
+        String sanitized = postalCode.replaceAll("[^a-zA-Z0-9-]", "");
+        return sanitized.substring(0, Math.min(sanitized.length(), 10));
     }
     
     /**
@@ -134,7 +135,8 @@ public class ProcessPaymentServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+        response.setContentType("application/json");
+
         try {
             // Validate required fields
             String[] requiredFields = {"account_number", "routing_number", "amount", 
