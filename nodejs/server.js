@@ -165,23 +165,17 @@ app.post('/process-payment', async (req, res) => {
         check.checkName = req.body.check_holder_name;
         check.secCode = SecCode.WEB;
 
-        // Create address object if zip code is provided
-        let address = null;
-        if (req.body.billing_zip) {
-            address = new Address();
-            address.postalCode = sanitizePostalCode(req.body.billing_zip);
-        }
+        // The Node SDK requires an address on every ACH charge, so send an
+        // empty one when the optional zip code is left blank
+        const address = new Address();
+        address.postalCode = sanitizePostalCode(req.body.billing_zip);
 
         // Process charge with the specified amount
-        let chargeBuilder = check.charge(amount)
+        const response = await check.charge(amount)
             .withAllowDuplicates(true)
-            .withCurrency('USD');
-        
-        if (address) {
-            chargeBuilder = chargeBuilder.withAddress(address);
-        }
-            
-        const response = await chargeBuilder.execute();
+            .withCurrency('USD')
+            .withAddress(address)
+            .execute();
 
         // Check for successful response code
         if (response.responseCode !== '00') {
