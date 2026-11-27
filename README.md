@@ -111,21 +111,21 @@ Open the local URL printed by the PHP server.
 npm install
 npm start
 ```
-Open: http://localhost:8001
+Open: http://localhost:8000
 
 **.NET:**
 ```bash
 dotnet restore
 dotnet run
 ```
-Open: http://localhost:8006
+Open: http://localhost:8000
 
 **Java:**
 ```bash
 mvn clean package
 mvn cargo:run
 ```
-Open: http://localhost:8004
+Open: http://localhost:8000
 
 ### 4. Submit a test payment
 
@@ -187,8 +187,8 @@ Processes an ACH/eCheck payment using direct bank account data.
 **Request body:**
 ```json
 {
-  "account_number": "12345678901",
-  "routing_number": "122105155",
+  "account_number": "1357902468",
+  "routing_number": "122000030",
   "account-type": "checking",
   "check-type": "personal",
   "check_holder_name": "Jane Smith",
@@ -236,12 +236,12 @@ Processes an ACH/eCheck payment using direct bank account data.
 
 ## Test Accounts
 
-Use these in sandbox environments. Portico sandbox does not validate real account numbers — use any plausible format.
+Use these in sandbox environments. The sandbox does not approve every made up account, for example 12345678901 with routing 122105155 comes back as Transaction Failed.
 
 | Field | Test Value |
 |-------|------------|
-| Account Number | `12345678901` |
-| Routing Number | `122105155` (valid ABA checksum) |
+| Account Number | `1357902468` |
+| Routing Number | `122000030` (valid ABA checksum) |
 | Account Type | `checking` |
 | Check Type | `personal` |
 | Amount | Any positive decimal |
@@ -305,7 +305,7 @@ portico-online-check-payments/
 ## Troubleshooting
 
 **`Invalid routing number` error**
-The routing number failed the ABA checksum validation. Use a valid 9-digit routing number — `122105155` works for sandbox testing.
+The routing number failed the ABA checksum validation. Use a valid 9-digit routing number — `122000030` works for sandbox testing.
 
 **`Transaction Declined` response**
 Portico sandbox may decline transactions with certain account/routing combinations. Use the test values in [Test Accounts](#test-accounts).

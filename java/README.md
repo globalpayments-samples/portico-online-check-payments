@@ -47,7 +47,7 @@ mvn clean package
 mvn cargo:run
 ```
 
-Open: http://localhost:8004
+Open: http://localhost:8000
 
 ---
 
@@ -168,8 +168,8 @@ Processes an ACH/eCheck charge.
 
 | Field | Value |
 |-------|-------|
-| Account Number | `12345678901` |
-| Routing Number | `122105155` |
+| Account Number | `1357902468` |
+| Routing Number | `122000030` |
 | Account Type | `checking` |
 | Check Type | `personal` |
 | Amount | Any positive decimal |
@@ -185,7 +185,7 @@ Install Java 21+: https://adoptium.net
 Install Maven 3.8+: https://maven.apache.org/download.cgi
 
 **`Invalid routing number`**
-Use `122105155` — a valid ABA routing number that passes checksum validation.
+Use `122000030` — a valid ABA routing number that passes checksum validation.
 
 **Build fails on `mvn clean package`**
 Run `mvn dependency:resolve` to ensure SDK artifacts are downloaded from Maven Central.

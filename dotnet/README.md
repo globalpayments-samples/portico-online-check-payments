@@ -46,7 +46,7 @@ dotnet restore
 dotnet run
 ```
 
-Open: http://localhost:8006
+Open: http://localhost:8000
 
 ---
 
@@ -169,8 +169,8 @@ Processes an ACH/eCheck charge.
 
 | Field | Value |
 |-------|-------|
-| Account Number | `12345678901` |
-| Routing Number | `122105155` |
+| Account Number | `1357902468` |
+| Routing Number | `122000030` |
 | Account Type | `checking` |
 | Check Type | `personal` |
 | Amount | Any positive decimal |
@@ -183,7 +183,7 @@ Processes an ACH/eCheck charge.
 Install the .NET 8.0 SDK from https://dotnet.microsoft.com/download
 
 **`Invalid routing number`**
-Use `122105155` — a valid ABA routing number. Others will be rejected before the API call.
+Use `122000030` — a valid ABA routing number. Others will be rejected before the API call.
 
 **Port 8006 in use**
 Change `ASPNETCORE_URLS` in `.env` or update the port mapping in `docker-compose.yml`.

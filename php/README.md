@@ -176,8 +176,8 @@ Processes an ACH/eCheck charge.
 
 | Field | Value |
 |-------|-------|
-| Account Number | `12345678901` |
-| Routing Number | `122105155` |
+| Account Number | `1357902468` |
+| Routing Number | `122000030` |
 | Account Type | `checking` |
 | Check Type | `personal` |
 | Amount | Any positive decimal |
@@ -190,7 +190,7 @@ Processes an ACH/eCheck charge.
 Install Composer: https://getcomposer.org/download/
 
 **`Invalid routing number`**
-Use `122105155` — a valid ABA routing number that passes checksum validation.
+Use `122000030` — a valid ABA routing number that passes checksum validation.
 
 **Port 8003 in use**
 Set `PORT=8004` before `./run.sh`
