@@ -111,6 +111,8 @@ function sanitizeAccountNumber(?string $accountNumber): string
 // Initialize SDK configuration
 configureSdk();
 
+header('Content-Type: application/json');
+
 try {
     // Validate required fields for direct ACH/eCheck processing
     if (!isset($_POST['account_number'], $_POST['routing_number'], $_POST['amount'], $_POST['account_type'], $_POST['check_type'], $_POST['check_holder_name'])) {
