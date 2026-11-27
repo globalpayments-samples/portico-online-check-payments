@@ -64,13 +64,13 @@ This is an ACH/eCheck sample — no card numbers are involved.
 
 | Field | Test Value |
 |-------|------------|
-| Account Number | `12345678901` |
-| Routing Number | `122105155` (passes ABA checksum algorithm) |
+| Account Number | `1357902468` |
+| Routing Number | `122000030` (passes ABA checksum algorithm) |
 | Account Type | `checking` |
 | Check Type | `personal` |
 | Amount | Any positive decimal (e.g. `25.00`) |
 
-Portico sandbox does not validate real account data — use any plausible format. Get credentials at [developer.globalpayments.com](https://developer.globalpayments.com).
+These are the values the Global Payments SDK tests use and the cert gateway approves them. Made up pairs are not always approved, for example 12345678901 with 122105155 comes back as Transaction Failed. Get credentials at [developer.globalpayments.com](https://developer.globalpayments.com).
 
 ## Architecture Summary
 
@@ -102,16 +102,16 @@ curl http://localhost:8000/config
 
 # Process payment — PHP, .NET (underscored field names)
 curl -X POST http://localhost:8000/process-payment \
-  -d "account_number=12345678901&routing_number=122105155&account_type=checking&check_type=personal&check_holder_name=Jane+Smith&amount=25.00"
+  -d "account_number=1357902468&routing_number=122000030&account_type=checking&check_type=personal&check_holder_name=Jane+Smith&amount=25.00"
 # Expected: {"success":true,"message":"Payment successful! Transaction ID: ...","data":{"transactionId":"..."}}
 
 # Process payment — Node.js (hyphenated field names)
 curl -X POST http://localhost:8000/process-payment \
-  -d "account_number=12345678901&routing_number=122105155&account-type=checking&check-type=personal&check_holder_name=Jane+Smith&amount=25.00"
+  -d "account_number=1357902468&routing_number=122000030&account-type=checking&check-type=personal&check_holder_name=Jane+Smith&amount=25.00"
 
 # Process payment — Java (different path: /ProcessPaymentServlet)
 curl -X POST http://localhost:8000/ProcessPaymentServlet \
-  -d "account_number=12345678901&routing_number=122105155&account_type=checking&check_type=personal&check_holder_name=Jane+Smith&amount=25.00"
+  -d "account_number=1357902468&routing_number=122000030&account_type=checking&check_type=personal&check_holder_name=Jane+Smith&amount=25.00"
 ```
 
 ## Making Changes

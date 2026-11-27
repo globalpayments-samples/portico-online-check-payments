@@ -46,7 +46,7 @@ npm install
 npm start
 ```
 
-Open: http://localhost:8001
+Open: http://localhost:8000
 
 ---
 
@@ -179,8 +179,8 @@ Processes an ACH/eCheck charge.
 
 | Field | Value |
 |-------|-------|
-| Account Number | `12345678901` |
-| Routing Number | `122105155` |
+| Account Number | `1357902468` |
+| Routing Number | `122000030` |
 | Account Type | `checking` |
 | Check Type | `personal` |
 | Amount | Any positive decimal |
@@ -190,7 +190,7 @@ Processes an ACH/eCheck charge.
 ## Troubleshooting
 
 **`Invalid routing number`**
-Use `122105155` — passes ABA checksum. Other numbers will be rejected before the API call.
+Use `122000030` — passes ABA checksum. Other numbers will be rejected before the API call.
 
 **Port 8001 in use**
 Set `PORT=8002` in `.env` or change the host mapping in `docker-compose.yml`.
