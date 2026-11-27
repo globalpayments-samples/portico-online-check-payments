@@ -202,9 +202,9 @@ public class Program
             }
 
             // Parse account and check types
-            var checkType = string.Equals(accountTypeStr, "business", StringComparison.OrdinalIgnoreCase) 
+            var checkType = string.Equals(checkTypeStr, "business", StringComparison.OrdinalIgnoreCase) 
                 ? CheckType.BUSINESS : CheckType.PERSONAL;
-            var accountType = string.Equals(checkTypeStr, "savings", StringComparison.OrdinalIgnoreCase) 
+            var accountType = string.Equals(accountTypeStr, "savings", StringComparison.OrdinalIgnoreCase) 
                 ? AccountType.SAVINGS : AccountType.CHECKING;
 
             // Initialize eCheck payment data using direct bank account information
