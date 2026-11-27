@@ -190,7 +190,7 @@ Processes an ACH/eCheck charge.
 ## Troubleshooting
 
 **`Invalid routing number`**
-Use `122000030` — passes ABA checksum. Other numbers will be rejected before the API call.
+Use `122000030`, it passes the ABA checksum. Other numbers will be rejected before the API call.
 
 **Port 8001 in use**
 Set `PORT=8002` in `.env` or change the host mapping in `docker-compose.yml`.

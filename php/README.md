@@ -190,7 +190,7 @@ Processes an ACH/eCheck charge.
 Install Composer: https://getcomposer.org/download/
 
 **`Invalid routing number`**
-Use `122000030` — a valid ABA routing number that passes checksum validation.
+Use `122000030`, a valid ABA routing number that passes checksum validation.
 
 **Port 8003 in use**
 Set `PORT=8004` before `./run.sh`

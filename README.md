@@ -305,7 +305,7 @@ portico-online-check-payments/
 ## Troubleshooting
 
 **`Invalid routing number` error**
-The routing number failed the ABA checksum validation. Use a valid 9-digit routing number — `122000030` works for sandbox testing.
+The routing number failed the ABA checksum validation. Use a valid 9-digit routing number, `122000030` works for sandbox testing.
 
 **`Transaction Declined` response**
 Portico sandbox may decline transactions with certain account/routing combinations. Use the test values in [Test Accounts](#test-accounts).

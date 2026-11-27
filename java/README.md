@@ -185,7 +185,7 @@ Install Java 21+: https://adoptium.net
 Install Maven 3.8+: https://maven.apache.org/download.cgi
 
 **`Invalid routing number`**
-Use `122000030` — a valid ABA routing number that passes checksum validation.
+Use `122000030`, a valid ABA routing number that passes checksum validation.
 
 **Build fails on `mvn clean package`**
 Run `mvn dependency:resolve` to ensure SDK artifacts are downloaded from Maven Central.

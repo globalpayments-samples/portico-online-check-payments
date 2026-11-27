@@ -183,7 +183,7 @@ Processes an ACH/eCheck charge.
 Install the .NET 8.0 SDK from https://dotnet.microsoft.com/download
 
 **`Invalid routing number`**
-Use `122000030` — a valid ABA routing number. Others will be rejected before the API call.
+Use `122000030`, a valid ABA routing number. Others will be rejected before the API call.
 
 **Port 8006 in use**
 Change `ASPNETCORE_URLS` in `.env` or update the port mapping in `docker-compose.yml`.
